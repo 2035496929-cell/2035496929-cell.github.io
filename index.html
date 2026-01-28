@@ -251,7 +251,7 @@
         <div class="control-panel">
             <div class="control-row">
                 <label>点击间隔 (毫秒):</label>
-                <input type="number" id="clickInterval" value="1000" min="100" step="100">
+                <input type="number" id="clickInterval" value="1000" min="100" max="60000" step="100">
             </div>
             <div class="control-row">
                 <label>输入文本:</label>
@@ -259,7 +259,7 @@
             </div>
             <div class="control-row">
                 <label>打字速度 (毫秒/字符):</label>
-                <input type="number" id="typingSpeed" value="100" min="50" step="50">
+                <input type="number" id="typingSpeed" value="100" min="50" max="5000" step="50">
             </div>
             <div class="control-row">
                 <button id="startBtn" class="btn-start">▶️ 开始自动化</button>
@@ -335,8 +335,8 @@
                 this.updateUI(true);
                 this.log('🚀 自动化开始运行');
                 
-                const clickInterval = parseInt(document.getElementById('clickInterval').value);
-                const typingSpeed = parseInt(document.getElementById('typingSpeed').value);
+                const clickInterval = parseInt(document.getElementById('clickInterval').value, 10);
+                const typingSpeed = parseInt(document.getElementById('typingSpeed').value, 10);
                 
                 // 开始自动点击
                 this.startAutoClick(clickInterval);
@@ -447,7 +447,11 @@
                 const timestamp = new Date().toLocaleTimeString('zh-CN');
                 const logEntry = document.createElement('div');
                 logEntry.className = 'log-entry';
-                logEntry.innerHTML = `<span class="timestamp">[${timestamp}]</span> ${message}`;
+                const timestampSpan = document.createElement('span');
+                timestampSpan.className = 'timestamp';
+                timestampSpan.textContent = `[${timestamp}]`;
+                logEntry.appendChild(timestampSpan);
+                logEntry.appendChild(document.createTextNode(' ' + message));
                 
                 this.logArea.appendChild(logEntry);
                 this.logArea.scrollTop = this.logArea.scrollHeight;
