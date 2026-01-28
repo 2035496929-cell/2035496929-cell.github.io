@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网页自动点击和输入程序</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .control-panel {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .control-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .control-row:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            font-weight: bold;
+            color: #555;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        input[type="number"],
+        input[type="text"] {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        input[type="number"]:focus,
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .btn-start {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-start:hover {
+            background: #45a049;
+        }
+
+        .btn-stop {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-stop:hover {
+            background: #da190b;
+        }
+
+        .btn-start:disabled,
+        .btn-stop:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .demo-area {
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .demo-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .click-demo {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .demo-button {
+            padding: 15px 30px;
+            font-size: 16px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .demo-button:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .demo-button.clicked {
+            background: #4CAF50;
+            border-color: #4CAF50;
+            color: white;
+            transform: scale(0.95);
+        }
+
+        .input-demo {
+            margin-top: 20px;
+        }
+
+        .demo-input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .demo-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .click-counter {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .counter-text {
+            font-size: 18px;
+            color: #1976d2;
+            font-weight: bold;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .status.idle {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .status.running {
+            background: #4CAF50;
+            color: white;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .log-area {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+        }
+
+        .log-entry .timestamp {
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 网页自动点击和输入程序</h1>
+        <p class="subtitle">Web Auto Click & Input Program</p>
+
+        <div class="control-panel">
+            <div class="control-row">
+                <label>点击间隔 (毫秒):</label>
+                <input type="number" id="clickInterval" value="1000" min="100" max="60000" step="100">
+            </div>
+            <div class="control-row">
+                <label>输入文本:</label>
+                <input type="text" id="inputText" value="Hello, Auto Input!" placeholder="输入要自动填写的文本">
+            </div>
+            <div class="control-row">
+                <label>打字速度 (毫秒/字符):</label>
+                <input type="number" id="typingSpeed" value="100" min="50" max="5000" step="50">
+            </div>
+            <div class="control-row">
+                <button id="startBtn" class="btn-start">▶️ 开始自动化</button>
+                <button id="stopBtn" class="btn-stop" disabled>⏹️ 停止自动化</button>
+            </div>
+        </div>
+
+        <div class="demo-area">
+            <div class="demo-title">点击演示区域</div>
+            <div class="click-demo">
+                <button class="demo-button" data-id="1">按钮 1</button>
+                <button class="demo-button" data-id="2">按钮 2</button>
+                <button class="demo-button" data-id="3">按钮 3</button>
+                <button class="demo-button" data-id="4">按钮 4</button>
+                <button class="demo-button" data-id="5">按钮 5</button>
+            </div>
+            <div class="click-counter">
+                <div class="counter-text">总点击次数: <span id="clickCount">0</span></div>
+            </div>
+        </div>
+
+        <div class="demo-area">
+            <div class="demo-title">输入演示区域</div>
+            <div class="input-demo">
+                <input type="text" class="demo-input" id="input1" placeholder="自动输入框 1">
+                <input type="text" class="demo-input" id="input2" placeholder="自动输入框 2">
+                <input type="text" class="demo-input" id="input3" placeholder="自动输入框 3">
+            </div>
+        </div>
+
+        <div class="status idle" id="status">状态: 待机中</div>
+
+        <div class="log-area" id="logArea"></div>
+    </div>
+
+    <script>
+        class AutoClickAndInput {
+            constructor() {
+                this.isRunning = false;
+                this.clickInterval = null;
+                this.inputInterval = null;
+                this.clickCount = 0;
+                this.currentInputIndex = 0;
+                
+                this.demoButtons = document.querySelectorAll('.demo-button');
+                this.demoInputs = document.querySelectorAll('.demo-input');
+                this.clickCountElement = document.getElementById('clickCount');
+                this.statusElement = document.getElementById('status');
+                this.logArea = document.getElementById('logArea');
+                
+                this.initEventListeners();
+                this.log('程序初始化完成');
+            }
+
+            initEventListeners() {
+                document.getElementById('startBtn').addEventListener('click', () => this.start());
+                document.getElementById('stopBtn').addEventListener('click', () => this.stop());
+                
+                // 为演示按钮添加点击监听
+                this.demoButtons.forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const id = e.target.dataset.id;
+                        this.log(`手动点击了按钮 ${id}`);
+                        this.animateClick(e.target);
+                    });
+                });
+            }
+
+            start() {
+                if (this.isRunning) return;
+                
+                this.isRunning = true;
+                this.updateUI(true);
+                this.log('🚀 自动化开始运行');
+                
+                const clickInterval = parseInt(document.getElementById('clickInterval').value, 10);
+                const typingSpeed = parseInt(document.getElementById('typingSpeed').value, 10);
+                
+                // 开始自动点击
+                this.startAutoClick(clickInterval);
+                
+                // 开始自动输入
+                this.startAutoInput(typingSpeed);
+            }
+
+            stop() {
+                if (!this.isRunning) return;
+                
+                this.isRunning = false;
+                this.updateUI(false);
+                
+                if (this.clickInterval) {
+                    clearInterval(this.clickInterval);
+                    this.clickInterval = null;
+                }
+                
+                if (this.inputInterval) {
+                    clearTimeout(this.inputInterval);
+                    this.inputInterval = null;
+                }
+                
+                this.log('⏹️ 自动化已停止');
+            }
+
+            startAutoClick(interval) {
+                let buttonIndex = 0;
+                
+                this.clickInterval = setInterval(() => {
+                    if (!this.isRunning) return;
+                    
+                    const button = this.demoButtons[buttonIndex];
+                    button.click();
+                    
+                    this.clickCount++;
+                    this.clickCountElement.textContent = this.clickCount;
+                    this.animateClick(button);
+                    this.log(`🖱️ 自动点击了按钮 ${button.dataset.id}`);
+                    
+                    buttonIndex = (buttonIndex + 1) % this.demoButtons.length;
+                }, interval);
+            }
+
+            startAutoInput(typingSpeed) {
+                const text = document.getElementById('inputText').value;
+                
+                if (!text) {
+                    this.log('⚠️ 警告: 输入文本为空');
+                    return;
+                }
+                
+                let charIndex = 0;
+                const currentInput = this.demoInputs[this.currentInputIndex];
+                currentInput.value = '';
+                currentInput.focus();
+                
+                const typeNextChar = () => {
+                    if (!this.isRunning) return;
+                    
+                    if (charIndex < text.length) {
+                        currentInput.value += text[charIndex];
+                        charIndex++;
+                        
+                        this.inputInterval = setTimeout(typeNextChar, typingSpeed);
+                    } else {
+                        // 当前输入框完成，移动到下一个
+                        this.log(`⌨️ 完成输入到输入框 ${this.currentInputIndex + 1}: "${text}"`);
+                        this.currentInputIndex = (this.currentInputIndex + 1) % this.demoInputs.length;
+                        
+                        // 等待一会儿再开始下一个输入框
+                        this.inputInterval = setTimeout(() => {
+                            if (this.isRunning) {
+                                this.startAutoInput(typingSpeed);
+                            }
+                        }, 1000);
+                    }
+                };
+                
+                typeNextChar();
+            }
+
+            animateClick(button) {
+                button.classList.add('clicked');
+                setTimeout(() => {
+                    button.classList.remove('clicked');
+                }, 200);
+            }
+
+            updateUI(running) {
+                document.getElementById('startBtn').disabled = running;
+                document.getElementById('stopBtn').disabled = !running;
+                document.getElementById('clickInterval').disabled = running;
+                document.getElementById('inputText').disabled = running;
+                document.getElementById('typingSpeed').disabled = running;
+                
+                if (running) {
+                    this.statusElement.className = 'status running';
+                    this.statusElement.textContent = '状态: 运行中...';
+                } else {
+                    this.statusElement.className = 'status idle';
+                    this.statusElement.textContent = '状态: 待机中';
+                }
+            }
+
+            log(message) {
+                const timestamp = new Date().toLocaleTimeString('zh-CN');
+                const logEntry = document.createElement('div');
+                logEntry.className = 'log-entry';
+                const timestampSpan = document.createElement('span');
+                timestampSpan.className = 'timestamp';
+                timestampSpan.textContent = `[${timestamp}]`;
+                logEntry.appendChild(timestampSpan);
+                logEntry.appendChild(document.createTextNode(' ' + message));
+                
+                this.logArea.appendChild(logEntry);
+                this.logArea.scrollTop = this.logArea.scrollHeight;
+                
+                // 限制日志数量
+                if (this.logArea.children.length > 100) {
+                    this.logArea.removeChild(this.logArea.firstChild);
+                }
+            }
+        }
+
+        // 初始化程序
+        document.addEventListener('DOMContentLoaded', () => {
+            window.autoClickAndInput = new AutoClickAndInput();
+        });
+    </script>
+</body>
+</html>
